@@ -1,10 +1,10 @@
 import re
 import time
-from urllib.parse import urlparse
+from urllib.parse import urlparse, urlunparse, urljoin
+from urllib import robotparser
 from bs4 import BeautifulSoup
 from collections import defaultdict
 from urllib3.exceptions import NewConnectionError
-
 
 url_visit_count = defaultdict(int)
 allowed_domains = [
@@ -15,6 +15,27 @@ allowed_domains = [
 ]
 unique_urls = set()
 url_word_count = defaultdict(int)
+robots = {}
+
+
+def check_robots(parsed):
+    domain = parsed.netloc
+    if domain not in robots:
+        robotparse = robotparser.RobotFileParser(parsed.scheme + "://" + domain + "/robots.txt")
+        try:
+            robotparse.read()
+            robots[domain] = robotparse
+            return robotparse
+        except:
+            robots[domain] = None
+            return None
+    else:
+        return robots[domain]
+
+def strip_fragment_from_url(url):
+    parsed_url = urlparse(url)
+    # Return the URL without the fragment
+    return urlunparse(parsed_url._replace(fragment=''))
 
 def scraper(url, resp):
     global url_word_count
@@ -34,6 +55,9 @@ def extract_next_links(url, resp):
     # resp.url: the actual url of the page
     # resp.status: the status code returned by the server. 200 is OK, you got the page. Other numbers mean that there was some kind of problem.
     # resp.error: when status is not 200, you can check the error here, if needed.
+    # resp.raw_response: this is where the page actually is. More specifically, the raw_response has two parts:
+    #         resp.raw_response.url: the url, again
+    #         resp.raw_response.content: the content of the page!
 
     if resp.status != 200:
         print(resp.error)
@@ -41,17 +65,16 @@ def extract_next_links(url, resp):
     try:
         if not resp.raw_response:
             return []
-        
-        # resp.raw_response: this is where the page actually is. More specifically, the raw_response has two parts:
-        #         resp.raw_response.url: the url, again
-        #         resp.raw_response.content: the content of the page!
 
         content = resp.raw_response.content.decode('utf-8', errors='ignore')
         soup = BeautifulSoup(content, 'html.parser')
 
         links = []
         for link in soup.find_all('a', href=True):
-            links.append(link['href'])
+            url_with_fragment = urljoin(url, link['href'])
+            url_without_fragment = strip_fragment_from_url(url_with_fragment)  # Strip the fragment
+            links.append(url_without_fragment)
+
         return links
     
     except NewConnectionError as e:
@@ -71,6 +94,11 @@ def is_valid(url):
 
         # Check if URL has been visited more than 3 times in the last 10 seconds
         if url_visit_count[url] > 3 and time.time() - url_visit_count[url] < 10:
+            return False
+        
+        robotparse = check_robots(parsed)
+        
+        if robotparse and not robotparse.can_fetch("*", url):
             return False
         
         # Increment the visit count for the URL
