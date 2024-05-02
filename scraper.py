@@ -110,10 +110,6 @@ def tokenize(text, url):
 
     return True
 
-def get_absolute_path(path, current_url):
-    path = urldefrag(path)[0]
-    return urljoin(current_url, path)
-
 def scraper(url, resp):
     global unique_urls
 
@@ -172,7 +168,8 @@ def extract_next_links(url, resp):
 
         links = []
         for link in soup.find_all('a', href=True):
-            absolute = get_absolute_path(link['href'], resp.raw_response.url)
+            relative = strip_fragment_from_url(link['href']) #Strip the fragement
+            absolute = urljoin(resp.raw_response.url, relative) #Transform to absolute path
             links.append(absolute)
 
         return links
