@@ -1,6 +1,6 @@
 import re
-import time
-from urllib.parse import urlparse, urlunparse, urljoin
+from datetime import datetime, timedelta
+from urllib.parse import urlparse, urlunparse, urljoin, urldefrag
 from urllib import robotparser
 from bs4 import BeautifulSoup
 from collections import defaultdict, Counter
@@ -20,7 +20,7 @@ allowed_domains = [
     "stat.uci.edu"
 ]
 
-THRESHOLD = 5
+THRESHOLD = 3
 
 # URL name of the page that has the largest number of words
 maxpage = ""
@@ -79,10 +79,10 @@ def update_maxes(total_words: int, url):
 
 def is_low_info(tokens: int, total: int) -> bool:
     #checks the ratio of unique words to the total amount of words. 
-    #Return True if no words or if the ratio is less than 0.2 then there are a lot of duplicate words
+    #Return True if no words or if the ratio is less than 0.2 or if there are less than 20 words in total on the page
     if total > 0:
         ratio_unique = tokens / total
-        return ratio_unique < .2
+        return ratio_unique < .2 or total < 20
     else: 
         #Return True is there are no words
         return True
@@ -99,7 +99,7 @@ def tokenize(text, url):
 
     #check if the page has low information value
     if is_low_info(len(set(token_list)), total_words):
-        return
+        return False
 
     #update our global tokens
     for t in token_list:
@@ -108,8 +108,11 @@ def tokenize(text, url):
 
     update_maxes(total_words, url)
 
-    return
+    return True
 
+def get_absolute_path(path, current_url):
+    path = urldefrag(path)[0]
+    return urljoin(current_url, path)
 
 def scraper(url, resp):
     global unique_urls
@@ -131,26 +134,27 @@ def extract_next_links(url, resp):
     # resp.raw_response.content: the content of the page!
 
     global total_num_pages
+    
+
+    # Redirection Handling (HTTP Status 300-310)
+    if resp.status > 300 and resp.status < 310:
+        print(f"Redirection detected. Original URL: {url} \t Final URL: {resp.raw_response.url}")
+        if is_valid(resp.raw_response.url):
+            return [resp.raw_response.url]
+
 
     #Error Handling (HTTP Status - 200)
     if resp.status != 200:
         print(f"Error code 200: {resp.error}")
         return []
-    elif resp.raw_response.content == None:
-        print(f"Successful response 200 but content on the page is empty! URL: {resp.url}")
-        return []
     elif resp.raw_response == None:
         print(f"None object extracted from this url: {resp.url}")
         return []
-
-    #Redirection Handling (HTTP Status 300-309)
-    if resp.status > 300 and resp.status < 310:
-        print(f"Redirection detected. Original url : {resp.url} \t Final url: {resp.raw_response.url}")
-        if is_valid(resp.raw_response.url):
-            return [resp.raw_response.url]
-
-    #Checking redirection with comparing original URL with the final URL in case of invalid HTTP status response (edge cases)
-    elif url != resp.raw_response.url.rstrip("/"): 
+    elif resp.raw_response.content == None:
+        print(f"Successful response 200 but content on the page is empty! URL: {resp.url}")
+        return []
+        
+    if url != resp.raw_response.url.rstrip("/"): 
         print(f"Original URL and Final URL are not equivalent, redirection detected")
         return [resp.raw_response.url]
 
@@ -163,12 +167,12 @@ def extract_next_links(url, resp):
 
 
         #tokenize the words on the page
-        tokenize(soup.get_text(), resp.raw_response.url) # returns a list of tokens empty if it has low info
+        if not tokenize(soup.get_text(), url):
+            return []
 
         links = []
         for link in soup.find_all('a', href=True):
-            relative = strip_fragment_from_url(link['href']) #Strip the fragement
-            absolute = urljoin(resp.raw_response.url, relative) #Transform to absolute path
+            absolute = get_absolute_path(link['href'], resp.raw_response.url)
             links.append(absolute)
 
         return links
@@ -190,19 +194,21 @@ def is_valid(url):
         if not any(parsed.netloc.endswith(domain) for domain in allowed_domains):
             return False
 
-
         # Increment the visit count for the URL
-        url_visit_count[url] += 1
+        base = parsed.scheme + '://' + parsed.netloc + parsed.path
+        url_visit_count[base] += 1
 
-        # Check if URL has been visited more than THRESHOLD times in the last 15 seconds (trap)
-        if url_visit_count[url] > THRESHOLD and time.time() - url_visit_count[url] < 15:
+        # Check if URL has been visited more than THRESHOLD times 
+        if url_visit_count[base] > THRESHOLD:
             return False
-
-        # Check if URL has been stuck in an infinite loop of repeating directories/path (trap)
-        path_list = parsed.path.split("/")
-        count = Counter(path_list)
-        if count.most_common(1)[0][1] > THRESHOLD:
-            return False
+        
+        #Checks for loop in path
+        path_list = [p for p in parsed.path.split("/") if p]
+        if path_list:
+            count = Counter(path_list)
+            if count.most_common(1)[0][1] > THRESHOLD:
+                print(f"Path loop detected: {url}")
+                return False
 
         
         # Check if url can be crawled in the robots.txt permissions
@@ -236,9 +242,9 @@ def count_subdomains(uniques: set):
 def report_to_file():
     with open('result.txt', 'w') as file:
 
-        file.write(f"Total number of unique pages: {total_num_pages}\n")
+        file.write(f"Total number of unique pages: {total_num_pages}\n\n")
 
-        file.write(f"Largest page: {maxpage}, word count: {maxwords}\n")
+        file.write(f"Largest page: {maxpage}, word count: {maxwords}\n\n")
 
         word_tokens = {k: v for k, v in tokens.items() if not k.isdigit()}
         sorted_words = sorted(word_tokens.items(), key=lambda x: x[1], reverse=True)
@@ -246,7 +252,8 @@ def report_to_file():
         for token, freq in sorted_words[:50]:
             file.write(f"{token}: {freq}\n")
 
+
         subdomain_dict = count_subdomains(unique_urls)
-        file.write("Subdomain in ics.uci.edu domain:\n")
+        file.write("\nSubdomain in ics.uci.edu domain:\n")
         for subdomain, count in sorted(subdomain_dict.items(), key=lambda x: x[0]):
             file.write(f"{subdomain}, {count}\n")
