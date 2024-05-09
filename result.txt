@@ -1,71 +1,77 @@
-Total number of unique pages: 30183
+Total number of unique pages: 12795
 
-Largest page: http://archive.ics.uci.edu/ml/machine-learning-databases/JapaneseVowels-mld/ae.test, word count: 136488
+Largest page: https://www.ics.uci.edu/~eppstein/180a/projects/fanorona/Fanorona.hqx, word count: 88373
 
-Top 50 words:
-b: 48221
-n: 46442
-r: 42599
-h: 41120
-c: 40452
-p: 39398
-e: 38827
-j: 38046
-x: 35979
-f: 35349
-l: 34499
-research: 34338
-g: 34270
-k: 33428
-v: 32798
-u: 32514
-q: 32081
-w: 31394
-data: 31189
-z: 30624
-uci: 27388
-computer: 23709
-information: 21374
-student: 20116
-software: 18077
-ics: 17811
-students: 17178
-may: 15837
-science: 15593
-_: 15465
-time: 15189
-size: 14798
-set: 14652
-next: 14521
-graduate: 13992
-technical: 13802
-university: 13626
-engineering: 13437
-september: 13411
-new: 13340
-news: 12815
-const: 12649
-undergraduate: 12562
-unsigned: 12490
-informatics: 12426
-image: 12265
-department: 12226
-june: 12210
-october: 12130
-one: 11972
+Top 60 words:
+1. research: 20996
+2. uci: 18865
+3. data: 16703
+4. computer: 15827
+5. information: 13676
+6. students: 11953
+7. science: 11221
+8. ics: 10618
+9. student: 9714
+10. news: 9083
+11. time: 8971
+12. software: 8744
+13. university: 8541
+14. one: 8488
+15. may: 8458
+16. new: 8322
+17. ramesh: 8054
+18. search: 7911
+19. graduate: 7772
+20. school: 7691
+21. events: 7665
+22. learning: 7651
+23. current: 7370
+24. irvine: 7097
+25. set: 6675
+26. computing: 6464
+27. courses: 6395
+28. people: 6354
+29. contact: 6209
+30. systems: 6200
+31. also: 6178
+32. undergraduate: 6074
+33. department: 6053
+34. edu: 5895
+35. engineering: 5833
+36. faculty: 5725
+37. september: 5724
+38. design: 5702
+39. california: 5682
+40. us: 5651
+41. home: 5646
+42. past: 5634
+43. use: 5558
+44. course: 5454
+45. bren: 5449
+46. projects: 5374
+47. technical: 5334
+48. physics: 5317
+49. next: 5231
+50. two: 5195
+51. using: 5182
+52. machine: 5130
+53. first: 5035
+54. uc: 4958
+55. policies: 4927
+56. page: 4913
+57. number: 4874
+58. project: 4858
+59. algorithms: 4857
+60. support: 4847
 
 Subdomain in ics.uci.edu domain:
- codeexchange.ics.uci.edu, 1
-DataGuard.ics.uci.edu, 1
-DataProtector.ics.uci.edu, 1
-Transformativeplay.ics.uci.edu, 1
 accessibility.ics.uci.edu, 6
-acoi.ics.uci.edu, 74
+acoi.ics.uci.edu, 69
 aiclub.ics.uci.edu, 2
 alumni.ics.uci.edu, 6
 ambassadors.ics.uci.edu, 1
 archive-beta.ics.uci.edu, 3
-archive.ics.uci.edu, 2692
+archive.ics.uci.edu, 1987
 asterix.ics.uci.edu, 15
 asterixdb.ics.uci.edu, 3
 auge.ics.uci.edu, 2
@@ -73,120 +79,125 @@ calendar.ics.uci.edu, 1
 cbcl.ics.uci.edu, 2
 cert.ics.uci.edu, 33
 cgvw.ics.uci.edu, 1
-checkin.ics.uci.edu, 5
+checkin.ics.uci.edu, 2
 checkmate.ics.uci.edu, 1
 chenli.ics.uci.edu, 11
 cherry.ics.uci.edu, 1
 chime.ics.uci.edu, 1
 cloudberry.ics.uci.edu, 2
-cml.ics.uci.edu, 2
+cml.ics.uci.edu, 152
 code.ics.uci.edu, 13
 codeexchange.ics.uci.edu, 1
-computableplant.ics.uci.edu, 140
+computableplant.ics.uci.edu, 131
 containers.ics.uci.edu, 1
 coronavirustwittermap.ics.uci.edu, 1
 cradl.ics.uci.edu, 1
 create.ics.uci.edu, 7
 cwicsocal18.ics.uci.edu, 1
+DataGuard.ics.uci.edu, 1
 datalab.ics.uci.edu, 1
+DataProtector.ics.uci.edu, 1
 dblp.ics.uci.edu, 2
-dejavu.ics.uci.edu, 2
-dgillen.ics.uci.edu, 25
+dejavu.ics.uci.edu, 1
+dgillen.ics.uci.edu, 23
 drzaius.ics.uci.edu, 1
 duke.ics.uci.edu, 1
-duttgroup.ics.uci.edu, 90
+duttgroup.ics.uci.edu, 87
 dynamo.ics.uci.edu, 35
 edgelab.ics.uci.edu, 7
 elms.ics.uci.edu, 1
 emj-pc.ics.uci.edu, 1
-emj.ics.uci.edu, 38
+emj.ics.uci.edu, 37
 esl.ics.uci.edu, 7
-evoke.ics.uci.edu, 5
-fano.ics.uci.edu, 60
-flamingo.ics.uci.edu, 4310
-fr.ics.uci.edu, 9
+evoke.ics.uci.edu, 3
+fano.ics.uci.edu, 56
+flamingo.ics.uci.edu, 482
+fr.ics.uci.edu, 10
 frost.ics.uci.edu, 1
-futurehealth.ics.uci.edu, 5
-gitlab.ics.uci.edu, 1
+futurehealth.ics.uci.edu, 4
+gitlab.ics.uci.edu, 2
 grafana-infra-blue.ics.uci.edu, 1
-grape.ics.uci.edu, 611
+grape.ics.uci.edu, 329
 graphics.ics.uci.edu, 9
 graphmod.ics.uci.edu, 4
 hack.ics.uci.edu, 1
 hai.ics.uci.edu, 7
-hana.ics.uci.edu, 2
-helpdesk.ics.uci.edu, 5
+hana.ics.uci.edu, 3
+helpdesk.ics.uci.edu, 4
 hobbes.ics.uci.edu, 11
 hombao.ics.uci.edu, 2
 honors.ics.uci.edu, 2
 hpi.ics.uci.edu, 3
-hub.ics.uci.edu, 5
+hub.ics.uci.edu, 4
 i-sensorium.ics.uci.edu, 7
-informatics.ics.uci.edu, 2
+iasl.ics.uci.edu, 22
+industryshowcase.ics.uci.edu, 19
+informatics.ics.uci.edu, 1
 informatics.mt-live.ics.uci.edu, 3
 ipf.ics.uci.edu, 2
 ipubmed.ics.uci.edu, 1
-isg.ics.uci.edu, 143
+isg.ics.uci.edu, 141
 jgarcia.ics.uci.edu, 1
 jujube.ics.uci.edu, 2
 keys.ics.uci.edu, 1
 luci.ics.uci.edu, 2
-mailman.ics.uci.edu, 4
+mailman.ics.uci.edu, 3
 malek.ics.uci.edu, 1
-mapgrid.ics.uci.edu, 1
+map125.ics.uci.edu, 1
+mapgrid.ics.uci.edu, 2
 mcs.ics.uci.edu, 84
 mdogucu.ics.uci.edu, 1
 mds.ics.uci.edu, 21
-metaviz.ics.uci.edu, 1
-mhcid.ics.uci.edu, 19
+mhcid.ics.uci.edu, 17
 mondego.ics.uci.edu, 15
 mse.ics.uci.edu, 2
 mswe.ics.uci.edu, 14
-mt-live.ics.uci.edu, 6
+mt-live.ics.uci.edu, 3
 nalini.ics.uci.edu, 7
-ngs.ics.uci.edu, 1775
+ngs.ics.uci.edu, 1435
 onboarding.ics.uci.edu, 1
 password.ics.uci.edu, 1
 pgadmin.ics.uci.edu, 2
 plrg.ics.uci.edu, 84
 prometheus-infra-blue.ics.uci.edu, 1
-psearch.ics.uci.edu, 2
-radicle.ics.uci.edu, 6
-rambo.ics.uci.edu, 1
+psearch.ics.uci.edu, 1
+radicle.ics.uci.edu, 1
 redmiles.ics.uci.edu, 4
 riscit.ics.uci.edu, 3
 rstudio-hub.ics.uci.edu, 3
 satware.ics.uci.edu, 1
+scale.ics.uci.edu, 7
 sconce.ics.uci.edu, 1
-sdcl.ics.uci.edu, 205
-se.ics.uci.edu, 1
-seal.ics.uci.edu, 46
+sdcl.ics.uci.edu, 193
+se.ics.uci.edu, 3
+seal.ics.uci.edu, 45
 seraja.ics.uci.edu, 2
 sherlock.ics.uci.edu, 8
-sli.ics.uci.edu, 500
+sli.ics.uci.edu, 593
 sourcerer.ics.uci.edu, 2
 speedtest.ics.uci.edu, 1
 sprout.ics.uci.edu, 2
 stairs.ics.uci.edu, 4
 statconsulting.ics.uci.edu, 5
-student-council.ics.uci.edu, 2
+student-council.ics.uci.edu, 1
 studentcouncil.ics.uci.edu, 33
-support.ics.uci.edu, 6
-swiki.ics.uci.edu, 194
+students.ics.uci.edu, 1
+support.ics.uci.edu, 4
+swiki.ics.uci.edu, 167
 tad.ics.uci.edu, 3
 tastier.ics.uci.edu, 1
 testlab.ics.uci.edu, 9
 timesheet.ics.uci.edu, 1
-tippersweb.ics.uci.edu, 4
-transformativeplay.ics.uci.edu, 53
+tippersweb.ics.uci.edu, 1
+transformativeplay.ics.uci.edu, 50
 tutors.ics.uci.edu, 44
 ugradforms.ics.uci.edu, 1
 unite.ics.uci.edu, 10
-vision.ics.uci.edu, 220
-wearablegames.ics.uci.edu, 4
-wics.ics.uci.edu, 604
-wiki.ics.uci.edu, 183
-www-db.ics.uci.edu, 42
+vision.ics.uci.edu, 217
+wearablegames.ics.uci.edu, 3
+wics.ics.uci.edu, 558
+wiki.ics.uci.edu, 2
+www-db.ics.uci.edu, 38
 www.cert.ics.uci.edu, 1
 www.checkmate.ics.uci.edu, 1
 www.graphics.ics.uci.edu, 3

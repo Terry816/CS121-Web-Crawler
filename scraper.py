@@ -1,13 +1,11 @@
 import re
-from datetime import datetime, timedelta
-from urllib.parse import urlparse, urlunparse, urljoin, urldefrag
+from urllib.parse import urlparse, urljoin, urldefrag
 from urllib import robotparser
 from bs4 import BeautifulSoup
 from collections import defaultdict, Counter
 from urllib3.exceptions import NewConnectionError
-
+from hashlib import blake2b
 import nltk
-from nltk.tokenize import RegexpTokenizer
 from nltk.corpus import stopwords
 
 #run the below code if you haven't downloaded the stopwords yet
@@ -21,6 +19,10 @@ allowed_domains = [
 ]
 
 THRESHOLD = 3
+HASHBITS = 128
+SIMHASH_THRESHOLD = .90
+WORDS_THRESHOLD = 30
+LOW_INFO_THRESHOLD = .2
 
 # URL name of the page that has the largest number of words
 maxpage = ""
@@ -34,6 +36,9 @@ robots_dict = {}
 # set of visited pages
 unique_urls = set()
 
+#set of all the fingerprint bit values that we have already visited
+fingerprints = set()
+
 # {str: int} - dictionary of all the tokens from all the pages we have encountered
 tokens = defaultdict(int)
 
@@ -44,7 +49,7 @@ url_visit_count = defaultdict(int)
 total_num_pages = 0
 
 stop_words = set(stopwords.words('english'))
-special_char = {"-", "!", "?", ":", ";", ",", ".", "{", "}", "[", "]", "(", ")", "<", ">"}
+special_char = {"`", "~", "-", "_", "!", "?", ":", ";", ",", ".", "{", "}", "[", "]", "(", ")", "<", ">"}
 stop_words.update(special_char)
 
 
@@ -63,12 +68,6 @@ def check_robots(parsed):
     else:
         return robots_dict[domain]
 
-def strip_fragment_from_url(url):
-    parsed_url = urlparse(url)
-    # Return the URL without the fragment
-    return urlunparse(parsed_url._replace(fragment=''))
-
-
 def update_maxes(total_words: int, url):
     global maxwords, maxpage
 
@@ -77,35 +76,79 @@ def update_maxes(total_words: int, url):
         maxpage = url
 
 
-def is_low_info(tokens: int, total: int) -> bool:
-    #checks the ratio of unique words to the total amount of words. 
-    #Return True if no words or if the ratio is less than 0.2 or if there are less than 20 words in total on the page
-    if total > 0:
-        ratio_unique = tokens / total
-        return ratio_unique < .2 or total < 20
-    else: 
-        #Return True is there are no words
-        return True
+def is_low_info(unique_num: int, total: int) -> bool:
+    #checks the ratio of unique words to the total amount of words.
+    #returns True if the ratio is below the threshold which means content is low
 
+    if total <= WORDS_THRESHOLD:
+        return True
+    
+    ratio_unique = unique_num / total
+    return ratio_unique < LOW_INFO_THRESHOLD
+
+def simhash(token_counter):
+    token_hash = {token: int(blake2b(token.encode(), digest_size=16).hexdigest(), 16) for token in token_counter}
+
+    # Create a 128-dimensional vector V
+    V = [0] * HASHBITS
+    for token, count in token_counter.items():
+        hash_value = token_hash[token]
+
+        # Loop over each bit position
+        for i in range(HASHBITS):
+            bit = (hash_value >> i) & 1
+            if (bit == 1):
+                V[i] += count
+            else:
+                V[i] -= count
+
+    # Generate the 128-bit fingerprint
+    fingerprint = 0
+    for i, value in enumerate(V):
+        if value > 0:
+            fingerprint |= (1 << i)
+    
+    return fingerprint
+
+def similarity(hash1, hash2):
+    # Compute the similarity - get a result that has 1s in positions where the bits are different between the two hashes, and 0s where the bits are the same.
+    xor = hash1 ^ hash2
+
+    # Count the number of 1 bits
+    different_bits = bin(xor).count('1')
+
+    # Return the ratio of different bits out of 128-bits
+    return 1 - (different_bits / HASHBITS)
 
 def tokenize(text, url):
-    global stop_words, tokens
+    global stop_words, tokens, fingerprints
 
     #Accepts all words seperated by boundaries. "can't" -> "can" instead of "can't" -> "can", "t"
-    tokenizer = RegexpTokenizer(r'\b\w+\b')
-    token_list = tokenizer.tokenize(text.lower())
 
-    total_words = len(token_list)
+    token_list = re.findall(r'\b\w+\b', text.lower())
+    token_counter = Counter(token_list)
 
     #check if the page has low information value
-    if is_low_info(len(set(token_list)), total_words):
+    total_words = len(token_list)
+    unique_words = len(token_counter)
+    if is_low_info(unique_words, total_words):
         return False
 
-    #update our global tokens
-    for t in token_list:
-        if t not in stop_words:
-            tokens[t] += 1
+    #check if the content on this page is similar to the set of pages already
+    fingerprint = simhash(token_counter)
+    similar = any(similarity(fingerprint, f) >= SIMHASH_THRESHOLD for f in fingerprints)
+    if similar:
+        return False
 
+    #if we do not find any similarity then we add it to the set
+    fingerprints.add(fingerprint)
+
+    #if it passes all the checks then we update our global tokens
+    for t in token_list:
+        if t not in stop_words and len(t) > 1:
+            tokens[t] += 1
+    
+    #update the max page if this one is the largest
     update_maxes(total_words, url)
 
     return True
@@ -132,16 +175,9 @@ def extract_next_links(url, resp):
     global total_num_pages
     
 
-    # Redirection Handling (HTTP Status 300-310)
-    if resp.status > 300 and resp.status < 310:
-        print(f"Redirection detected. Original URL: {url} \t Final URL: {resp.raw_response.url}")
-        if is_valid(resp.raw_response.url):
-            return [resp.raw_response.url]
-
-
     #Error Handling (HTTP Status - 200)
     if resp.status != 200:
-        print(f"Error code 200: {resp.error}")
+        print(f"Error code 200: {resp.error} from {resp.url}")
         return []
     elif resp.raw_response == None:
         print(f"None object extracted from this url: {resp.url}")
@@ -149,27 +185,35 @@ def extract_next_links(url, resp):
     elif resp.raw_response.content == None:
         print(f"Successful response 200 but content on the page is empty! URL: {resp.url}")
         return []
-        
-    if url != resp.raw_response.url.rstrip("/"): 
-        print(f"Original URL and Final URL are not equivalent, redirection detected")
-        return [resp.raw_response.url]
+
+    # Redirection Handling (HTTP Status 300-310)
+    if resp.status >= 300 and resp.status < 310:
+        print(f"Redirection detected. Original URL: {url} \t Final URL: {resp.raw_response.url}")
+        if is_valid(resp.raw_response.url):
+            return [resp.raw_response.url]
+
+    #second method to check for redirection
+    if resp.raw_response.url.rstrip("/") != url:
+        print(f"Second method detected redirection. original: {url}, redirected {resp.url}")
+        if is_valid(resp.raw_response.url):
+            return [resp.raw_response.url]
 
 
     #Crawl the final URL (resp.raw_response.url)
     try:
-        content = resp.raw_response.content.decode('utf-8', errors='ignore')
-        soup = BeautifulSoup(content, 'lxml')
-        total_num_pages+=1
-
+        soup = BeautifulSoup(resp.raw_response.content, "lxml")
 
         #tokenize the words on the page
+        #Return true if we successfully did, if not we should return False and not crawl this page
         if not tokenize(soup.get_text(), url):
             return []
+        
+        total_num_pages+=1
 
         links = []
         for link in soup.find_all('a', href=True):
-            relative = strip_fragment_from_url(link['href']) #Strip the fragement
-            absolute = urljoin(resp.raw_response.url, relative) #Transform to absolute path
+            relative = urldefrag(link.get("href"))[0]
+            absolute = urljoin(resp.raw_response.url, relative)
             links.append(absolute)
 
         return links
@@ -184,20 +228,13 @@ def is_valid(url):
         parsed = urlparse(url)
 
         # Check if the url is not None and URL scheme is http or https 
-        if not parsed.netloc or parsed.scheme not in ['http', 'https']: 
+        if not parsed.hostname or parsed.scheme not in ['http', 'https']: 
             return False
         
         # Check if the domain is in the list of allowed domains
-        if not any(parsed.netloc.endswith(domain) for domain in allowed_domains):
+        if not any(parsed.hostname.lower().endswith(domain) for domain in allowed_domains):
             return False
 
-        # Increment the visit count for the URL
-        base = parsed.scheme + '://' + parsed.netloc + parsed.path
-        url_visit_count[base] += 1
-
-        # Check if URL has been visited more than THRESHOLD times 
-        if url_visit_count[base] > THRESHOLD:
-            return False
         
         #Checks for loop in path
         path_list = [p for p in parsed.path.split("/") if p]
@@ -206,6 +243,15 @@ def is_valid(url):
             if count.most_common(1)[0][1] > THRESHOLD:
                 print(f"Path loop detected: {url}")
                 return False
+
+
+        # Increment the visit count for the URL
+        skimmed = parsed.scheme + '://' + parsed.hostname + parsed.path
+        url_visit_count[skimmed] += 1
+
+        # Check if URL has been visited more than THRESHOLD times 
+        if url_visit_count[skimmed] > THRESHOLD:
+            return False
 
         
         # Check if url can be crawled in the robots.txt permissions
@@ -245,12 +291,13 @@ def report_to_file():
 
         word_tokens = {k: v for k, v in tokens.items() if not k.isdigit()}
         sorted_words = sorted(word_tokens.items(), key=lambda x: x[1], reverse=True)
-        file.write("Top 50 words:\n")
-        for token, freq in sorted_words[:50]:
-            file.write(f"{token}: {freq}\n")
-
+        file.write("Top 60 words:\n")
+        count = 1
+        for token, freq in sorted_words[:60]:
+            file.write(f"{count}. {token}: {freq}\n")
+            count += 1
 
         subdomain_dict = count_subdomains(unique_urls)
         file.write("\nSubdomain in ics.uci.edu domain:\n")
-        for subdomain, count in sorted(subdomain_dict.items(), key=lambda x: x[0]):
+        for subdomain, count in sorted(subdomain_dict.items(), key=lambda x: x[0].lower()):
             file.write(f"{subdomain}, {count}\n")
