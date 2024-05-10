@@ -1,8 +1,9 @@
 Total number of unique pages: 12795
 
-Largest page: https://www.ics.uci.edu/~eppstein/180a/projects/fanorona/Fanorona.hqx, word count: 88373
+Largest page: https://www.ics.uci.edu/~eppstein/180a/projects/fanorona/Fanorona.hqx, 
+Largest page word count: 88373
 
-Top 60 words:
+Top 50 words:
 1. research: 20996
 2. uci: 18865
 3. data: 16703
@@ -33,36 +34,26 @@ Top 60 words:
 28. people: 6354
 29. contact: 6209
 30. systems: 6200
-31. also: 6178
-32. undergraduate: 6074
-33. department: 6053
-34. edu: 5895
-35. engineering: 5833
-36. faculty: 5725
-37. september: 5724
-38. design: 5702
-39. california: 5682
-40. us: 5651
-41. home: 5646
-42. past: 5634
-43. use: 5558
-44. course: 5454
-45. bren: 5449
-46. projects: 5374
-47. technical: 5334
-48. physics: 5317
-49. next: 5231
-50. two: 5195
-51. using: 5182
-52. machine: 5130
-53. first: 5035
-54. uc: 4958
-55. policies: 4927
-56. page: 4913
-57. number: 4874
-58. project: 4858
-59. algorithms: 4857
-60. support: 4847
+31. undergraduate: 6074
+32. department: 6053
+33. edu: 5895
+34. engineering: 5833
+35. faculty: 5725
+36. september: 5724
+37. design: 5702
+38. california: 5682
+39. us: 5651
+40. home: 5646
+41. past: 5634
+42. use: 5558
+43. course: 5454
+44. bren: 5449
+45. projects: 5374
+46. technical: 5334
+47. physics: 5317
+48. next: 5231
+49. two: 5195
+50. using: 5182
 
 Subdomain in ics.uci.edu domain:
 accessibility.ics.uci.edu, 6
