@@ -174,6 +174,11 @@ def extract_next_links(url, resp):
 
     global total_num_pages
     
+    # Redirection Handling (HTTP Status 300-310)
+    if resp.status >= 300 and resp.status < 310:
+        print(f"Redirection detected. Original URL: {url} \t Final URL: {resp.raw_response.url}")
+        if is_valid(resp.raw_response.url):
+            return [resp.raw_response.url]
 
     #Error Handling (HTTP Status - 200)
     if resp.status != 200:
@@ -186,15 +191,9 @@ def extract_next_links(url, resp):
         print(f"Successful response 200 but content on the page is empty! URL: {resp.url}")
         return []
 
-    # Redirection Handling (HTTP Status 300-310)
-    if resp.status >= 300 and resp.status < 310:
-        print(f"Redirection detected. Original URL: {url} \t Final URL: {resp.raw_response.url}")
-        if is_valid(resp.raw_response.url):
-            return [resp.raw_response.url]
-
     #second method to check for redirection
     if resp.raw_response.url.rstrip("/") != url:
-        print(f"Second method detected redirection. original: {url}, redirected {resp.url}")
+        print(f"Second method detected redirection. original: {url}, redirected {resp.raw_response.url}")
         if is_valid(resp.raw_response.url):
             return [resp.raw_response.url]
 
@@ -300,4 +299,4 @@ def report_to_file():
         subdomain_dict = count_subdomains(unique_urls)
         file.write("\nSubdomain in ics.uci.edu domain:\n")
         for subdomain, count in sorted(subdomain_dict.items(), key=lambda x: x[0].lower()):
-            file.write(f"{subdomain}, {count}\n")
+            file.write(f"{subdomain.lower()}, {count}\n")

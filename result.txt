@@ -94,9 +94,9 @@ coronavirustwittermap.ics.uci.edu, 1
 cradl.ics.uci.edu, 1
 create.ics.uci.edu, 7
 cwicsocal18.ics.uci.edu, 1
-DataGuard.ics.uci.edu, 1
+dataguard.ics.uci.edu, 1
 datalab.ics.uci.edu, 1
-DataProtector.ics.uci.edu, 1
+dataprotector.ics.uci.edu, 1
 dblp.ics.uci.edu, 2
 dejavu.ics.uci.edu, 1
 dgillen.ics.uci.edu, 23
