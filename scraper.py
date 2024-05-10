@@ -214,7 +214,7 @@ def extract_next_links(url, resp):
             relative = urldefrag(link.get("href"))[0]
             absolute = urljoin(resp.raw_response.url, relative)
             links.append(absolute)
-
+        
         return links
     
     except NewConnectionError as e: #catches server down, network/connectivity issues
@@ -283,8 +283,8 @@ def count_subdomains(uniques: set):
 
 def report_to_file():
     with open('result.txt', 'w') as file:
-
-        file.write(f"Total number of unique pages: {total_num_pages}\n\n")
+        file.write(f"Total number of pages: {total_num_pages}\n\n")
+        file.write(f"Total number of unique pages: {len(unique_urls)}\n\n")
 
         file.write(f"Largest page: {maxpage}, word count: {maxwords}\n\n")
 
